@@ -44,7 +44,7 @@ Depois de salvar o `.env`, rode `npm run ai:alerts`: o título deve mostrar **"G
 | Comando | O que faz |
 |---|---|
 | `npm run pii:scan` | Mostra o motor de PII varrendo um payload de exemplo (ou um texto: `npm run pii:scan -- "texto"`) |
-| `npm test` | Executa os 24 testes automatizados |
+| `npm test` | Executa os 22 testes automatizados |
 | `npm run taint:static` | Taint Analysis estático (AST) no app vulnerável e no corrigido |
 | `npm run taint:runtime` | Taint Analysis dinâmico: monitor, bloqueio em tempo real e app corrigido |
 | `npm run ai:alerts` | Traduz achados técnicos em alertas para o cidadão |
