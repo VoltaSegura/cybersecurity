@@ -1,0 +1,1185 @@
+{
+  "geradoEm": "19/11/2026, 16:05:33",
+  "risco": {
+    "antes": {
+      "score": 95,
+      "level": "Crítico",
+      "leaks": 26,
+      "blocked": 0,
+      "bySink": {
+        "log": 11,
+        "analytics": 5,
+        "errorReport": 6,
+        "llm": 4
+      },
+      "byCategory": {
+        "localizacao": 19,
+        "contato": 3,
+        "credencial": 2,
+        "identificador": 1,
+        "saude": 1
+      }
+    },
+    "bloqueio": {
+      "score": 0,
+      "level": "Baixo",
+      "leaks": 0,
+      "blocked": 26,
+      "bySink": {},
+      "byCategory": {}
+    },
+    "depois": {
+      "score": 0,
+      "level": "Baixo",
+      "leaks": 0,
+      "blocked": 0,
+      "bySink": {},
+      "byCategory": {}
+    }
+  },
+  "estatica": {
+    "antes": [
+      {
+        "file": "app/vulnerable/routes.ts",
+        "line": 11,
+        "sink": "ctx.logger.info",
+        "sinkKind": "log",
+        "sources": [
+          "req.body.origem",
+          "req.body.destino",
+          "req.body.lat",
+          "req.body.lng",
+          "req.user"
+        ],
+        "variables": [
+          "origem",
+          "destino",
+          "lat",
+          "lng",
+          "email"
+        ],
+        "categories": [
+          "localizacao",
+          "dado-do-usuario"
+        ],
+        "snippet": "ctx.logger.info(`consulta de rota ${origem} -> ${destino} (${lat},${lng}) por ${email}`)"
+      },
+      {
+        "file": "app/vulnerable/routes.ts",
+        "line": 12,
+        "sink": "ctx.analytics.track",
+        "sinkKind": "analytics",
+        "sources": [
+          "req.body.origem",
+          "req.body.destino",
+          "req.user"
+        ],
+        "variables": [
+          "origem",
+          "destino",
+          "email"
+        ],
+        "categories": [
+          "localizacao",
+          "dado-do-usuario"
+        ],
+        "snippet": "ctx.analytics.track('rota_consultada', { origem, destino, usuario: email })"
+      },
+      {
+        "file": "app/vulnerable/routes.ts",
+        "line": 16,
+        "sink": "ctx.errors.report",
+        "sinkKind": "errorReport",
+        "sources": [
+          "req.body"
+        ],
+        "variables": [],
+        "categories": [
+          "dado-do-usuario"
+        ],
+        "snippet": "ctx.errors.report(`falha ao calcular rota: ${JSON.stringify(req.body)}`)"
+      },
+      {
+        "file": "app/vulnerable/routes.ts",
+        "line": 25,
+        "sink": "ctx.logger.debug",
+        "sinkKind": "log",
+        "sources": [
+          "req.body.email",
+          "req.body.senha"
+        ],
+        "variables": [
+          "email",
+          "senha"
+        ],
+        "categories": [
+          "contato",
+          "credencial"
+        ],
+        "snippet": "ctx.logger.debug(`tentativa de login ${email} senha=${senha}`)"
+      },
+      {
+        "file": "app/vulnerable/routes.ts",
+        "line": 26,
+        "sink": "ctx.logger.info",
+        "sinkKind": "log",
+        "sources": [
+          "req.headers.authorization"
+        ],
+        "variables": [
+          "token"
+        ],
+        "categories": [
+          "credencial"
+        ],
+        "snippet": "ctx.logger.info(`sessão iniciada com ${token}`)"
+      },
+      {
+        "file": "app/vulnerable/routes.ts",
+        "line": 33,
+        "sink": "ctx.llm.ask",
+        "sinkKind": "llm",
+        "sources": [
+          "req.body.texto"
+        ],
+        "variables": [
+          "texto"
+        ],
+        "categories": [
+          "dado-do-usuario"
+        ],
+        "snippet": "ctx.llm.ask(`Resuma o chamado do usuário: ${texto}`)"
+      },
+      {
+        "file": "app/vulnerable/routes.ts",
+        "line": 39,
+        "sink": "ctx.logger.info",
+        "sinkKind": "log",
+        "sources": [
+          "req.body.lat",
+          "req.body.lng"
+        ],
+        "variables": [
+          "lat",
+          "lng"
+        ],
+        "categories": [
+          "localizacao"
+        ],
+        "snippet": "ctx.logger.info(`posição ao vivo da sessão: ${lat},${lng}`)"
+      }
+    ],
+    "depois": []
+  },
+  "alertas": [
+    {
+      "titulo": "Senha vazada no registro do sistema",
+      "severity": "critical",
+      "category": "credencial",
+      "sink": "log",
+      "occurrences": 2,
+      "riscoReal": "Suas credenciais de acesso podem ser expostas em arquivos de registro do aplicativo.",
+      "oQueFazer": "Evite usar senhas fáceis e desconfie de comportamentos estranhos na conta.",
+      "correcaoTecnica": "Remova o registro de credenciais em texto puro no código. Utilize mascaramento antes de enviar dados para logs.",
+      "fonte": "llm"
+    },
+    {
+      "titulo": "Localização salva em registros",
+      "severity": "high",
+      "category": "localizacao",
+      "sink": "log",
+      "occurrences": 14,
+      "riscoReal": "Seus locais visitados podem ser lidos por terceiros que tenham acesso ao aparelho.",
+      "oQueFazer": "Revise as permissões de GPS concedidas ao aplicativo nas configurações do celular.",
+      "correcaoTecnica": "Filtre a coleta de coordenadas nos logs do sistema. Não armazene dados de geolocalização no console.",
+      "fonte": "llm"
+    },
+    {
+      "titulo": "Identificador enviado à inteligência artificial",
+      "severity": "high",
+      "category": "identificador",
+      "sink": "llm",
+      "occurrences": 1,
+      "riscoReal": "Seu código de identificação pessoal pode ser processado por serviços externos de IA.",
+      "oQueFazer": "Evite digitar informações que revelem sua identidade em chats do aplicativo.",
+      "correcaoTecnica": "Bloqueie o envio de IDs de usuário para APIs de IA. Substitua por tokens temporários e genéricos.",
+      "fonte": "llm"
+    },
+    {
+      "titulo": "Dados de saúde enviados à inteligência artificial",
+      "severity": "high",
+      "category": "saude",
+      "sink": "llm",
+      "occurrences": 1,
+      "riscoReal": "Informações sobre seu bem-estar podem ser armazenadas por servidores de IA de terceiros.",
+      "oQueFazer": "Não compartilhe detalhes médicos ou físicos nas ferramentas de atendimento do app.",
+      "correcaoTecnica": "Implemente filtros para impedir o envio de dados sensíveis de saúde para modelos de linguagem. Trate o conteúdo localmente.",
+      "fonte": "llm"
+    },
+    {
+      "titulo": "Contato salvo em registros",
+      "severity": "medium",
+      "category": "contato",
+      "sink": "log",
+      "occurrences": 3,
+      "riscoReal": "Seus números de telefone ou e-mails podem ficar visíveis em arquivos de texto do app.",
+      "oQueFazer": "Monitore quais dados pessoais você preenche nos campos de cadastro.",
+      "correcaoTecnica": "Apague linhas de código que gravam dados de contato nos registros do sistema. Oculte informações sensíveis.",
+      "fonte": "llm"
+    }
+  ],
+  "ruleCount": 15,
+  "ia": "llm",
+  "formula": {
+    "K": 40
+  },
+  "cenarios": 5,
+  "saidasVazadas": 9,
+  "evidencia": {
+    "antes": "consulta de rota Av. Paulista, 1578, Bela Vista -> Rua Vergueiro, 3185, Vila Mariana (-23.5614,-46.6559) por agatha.santos@example.com",
+    "bloqueio": "consulta de rota [BLOQUEADO:req.body.origem] -> [BLOQUEADO:req.body.destino] ([BLOQUEADO:req.body.lat],[BLOQUEADO:req.body.lng]) por [BLOQUEADO:req.user.email]"
+  },
+  "eventos": {
+    "antes": [
+      {
+        "origin": "req.body.origem",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••78",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "campo:origem",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••ta",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••85",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "campo:destino",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••na",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.lat",
+        "ruleId": "campo:lat",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••14",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.lng",
+        "ruleId": "campo:lng",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••59",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.user.email",
+        "ruleId": "email",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••om",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••78",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "analytics",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "campo:origem",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••ta",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "analytics",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••85",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "analytics",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "campo:destino",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••na",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "analytics",
+        "action": "detected"
+      },
+      {
+        "origin": "req.user.email",
+        "ruleId": "email",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••om",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "analytics",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••78",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "campo:origem",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••ta",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••85",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "campo:destino",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••na",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.lat",
+        "ruleId": "campo:lat",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••14",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.lng",
+        "ruleId": "campo:lng",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••59",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.user.email",
+        "ruleId": "email",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••om",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••78",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "analytics",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "campo:origem",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••ta",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "analytics",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••85",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "analytics",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "campo:destino",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••na",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "analytics",
+        "action": "detected"
+      },
+      {
+        "origin": "req.user.email",
+        "ruleId": "email",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••om",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "analytics",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••78",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "campo:origem",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••ta",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••85",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "campo:destino",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••na",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.lat",
+        "ruleId": "campo:lat",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••14",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.lng",
+        "ruleId": "campo:lng",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••59",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "detected"
+      },
+      {
+        "origin": "req.user.email",
+        "ruleId": "email",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••om",
+        "via": "taint",
+        "scenario": "login",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.senha",
+        "ruleId": "campo:senha",
+        "category": "credencial",
+        "severity": "critical",
+        "sensitive": false,
+        "masked": "•••••••••6!",
+        "via": "taint",
+        "scenario": "login",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.headers.authorization",
+        "ruleId": "bearer",
+        "category": "credencial",
+        "severity": "critical",
+        "sensitive": false,
+        "masked": "••••••••••lh",
+        "via": "taint",
+        "scenario": "login",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.texto",
+        "ruleId": "cpf",
+        "category": "identificador",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••25",
+        "via": "taint",
+        "scenario": "chamado-de-suporte",
+        "sink": "llm",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.texto",
+        "ruleId": "saude",
+        "category": "saude",
+        "severity": "high",
+        "sensitive": true,
+        "masked": "•••••••ca",
+        "via": "taint",
+        "scenario": "chamado-de-suporte",
+        "sink": "llm",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.texto",
+        "ruleId": "telefone-br",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••21",
+        "via": "taint",
+        "scenario": "chamado-de-suporte",
+        "sink": "llm",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.texto",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••00",
+        "via": "taint",
+        "scenario": "chamado-de-suporte",
+        "sink": "llm",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.lat",
+        "ruleId": "campo:lat",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••05",
+        "via": "taint",
+        "scenario": "compartilhar-trajeto",
+        "sink": "log",
+        "action": "detected"
+      },
+      {
+        "origin": "req.body.lng",
+        "ruleId": "campo:lng",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••33",
+        "via": "taint",
+        "scenario": "compartilhar-trajeto",
+        "sink": "log",
+        "action": "detected"
+      }
+    ],
+    "bloqueio": [
+      {
+        "origin": "req.body.origem",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••78",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "campo:origem",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••ta",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••85",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "campo:destino",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••na",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.lat",
+        "ruleId": "campo:lat",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••14",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.lng",
+        "ruleId": "campo:lng",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••59",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.user.email",
+        "ruleId": "email",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••om",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••78",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "analytics",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "campo:origem",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••ta",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "analytics",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••85",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "analytics",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "campo:destino",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••na",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "analytics",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.user.email",
+        "ruleId": "email",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••om",
+        "via": "taint",
+        "scenario": "consulta-de-rota",
+        "sink": "analytics",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••78",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "campo:origem",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••ta",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••85",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "campo:destino",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••na",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.lat",
+        "ruleId": "campo:lat",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••14",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.lng",
+        "ruleId": "campo:lng",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••59",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.user.email",
+        "ruleId": "email",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••om",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••78",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "analytics",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "campo:origem",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••ta",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "analytics",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••85",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "analytics",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "campo:destino",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••na",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "analytics",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.user.email",
+        "ruleId": "email",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••om",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "analytics",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••78",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.origem",
+        "ruleId": "campo:origem",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••ta",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••85",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.destino",
+        "ruleId": "campo:destino",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••na",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.lat",
+        "ruleId": "campo:lat",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••14",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.lng",
+        "ruleId": "campo:lng",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••59",
+        "via": "taint",
+        "scenario": "consulta-com-falha",
+        "sink": "errorReport",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.user.email",
+        "ruleId": "email",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••om",
+        "via": "taint",
+        "scenario": "login",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.senha",
+        "ruleId": "campo:senha",
+        "category": "credencial",
+        "severity": "critical",
+        "sensitive": false,
+        "masked": "•••••••••6!",
+        "via": "taint",
+        "scenario": "login",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.headers.authorization",
+        "ruleId": "bearer",
+        "category": "credencial",
+        "severity": "critical",
+        "sensitive": false,
+        "masked": "••••••••••lh",
+        "via": "taint",
+        "scenario": "login",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.texto",
+        "ruleId": "cpf",
+        "category": "identificador",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••25",
+        "via": "taint",
+        "scenario": "chamado-de-suporte",
+        "sink": "llm",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.texto",
+        "ruleId": "saude",
+        "category": "saude",
+        "severity": "high",
+        "sensitive": true,
+        "masked": "•••••••ca",
+        "via": "taint",
+        "scenario": "chamado-de-suporte",
+        "sink": "llm",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.texto",
+        "ruleId": "telefone-br",
+        "category": "contato",
+        "severity": "medium",
+        "sensitive": false,
+        "masked": "••••••••••21",
+        "via": "taint",
+        "scenario": "chamado-de-suporte",
+        "sink": "llm",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.texto",
+        "ruleId": "endereco",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••••••00",
+        "via": "taint",
+        "scenario": "chamado-de-suporte",
+        "sink": "llm",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.lat",
+        "ruleId": "campo:lat",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••05",
+        "via": "taint",
+        "scenario": "compartilhar-trajeto",
+        "sink": "log",
+        "action": "blocked"
+      },
+      {
+        "origin": "req.body.lng",
+        "ruleId": "campo:lng",
+        "category": "localizacao",
+        "severity": "high",
+        "sensitive": false,
+        "masked": "••••••33",
+        "via": "taint",
+        "scenario": "compartilhar-trajeto",
+        "sink": "log",
+        "action": "blocked"
+      }
+    ],
+    "depois": []
+  }
+}

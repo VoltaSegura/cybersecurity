@@ -1,0 +1,24 @@
+{
+  "name": "voltasegura-cybersec",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Módulo de Cybersecurity do VoltaSegura: motor de PII, Taint Analysis, alertas por IA e dashboard de Risco Cidadão",
+  "type": "module",
+  "scripts": {
+    "pii:scan": "tsx src/cli/pii-scan.ts",
+    "taint:static": "tsx src/cli/taint-static.ts",
+    "taint:runtime": "tsx src/cli/taint-runtime.ts",
+    "ai:alerts": "tsx src/cli/ai-alerts.ts",
+    "ai:models": "tsx src/cli/ai-models.ts",
+    "audit": "tsx src/cli/audit.ts",
+    "test": "node --import tsx --test --test-reporter=spec tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "typescript": "5.9.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0"
+  }
+}

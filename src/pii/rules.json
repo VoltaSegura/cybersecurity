@@ -1,0 +1,28 @@
+{
+  "rules": [
+    { "id": "cpf", "label": "CPF", "category": "identificador", "severity": "high", "pattern": "(?<!\\d)\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}(?!\\d)", "validator": "cpf", "confidence": 0.97 },
+    { "id": "email", "label": "E-mail", "category": "contato", "severity": "medium", "pattern": "[\\w.+-]+@[\\w-]+(?:\\.[\\w-]+)+", "confidence": 0.95 },
+    { "id": "telefone-br", "label": "Telefone", "category": "contato", "severity": "medium", "pattern": "(?<!\\d)(?:\\+?55\\s?)?\\(?[1-9]\\d\\)?\\s?9?\\d{4}[-\\s]?\\d{4}(?!\\d)", "validator": "phone-br", "confidence": 0.8 },
+    { "id": "cep", "label": "CEP", "category": "localizacao", "severity": "medium", "pattern": "(?<!\\d)\\d{5}-\\d{3}(?!\\d)", "confidence": 0.7 },
+    { "id": "gps-par", "label": "Coordenada GPS", "category": "localizacao", "severity": "high", "pattern": "(?<![\\d.])-?\\d{1,2}\\.\\d{4,}\\s*[,;]\\s*-?\\d{1,3}\\.\\d{4,}(?!\\d)", "validator": "coords", "confidence": 0.95 },
+    { "id": "gps-campo", "label": "Coordenada GPS (lat/lng)", "category": "localizacao", "severity": "high", "pattern": "(?:lat(?:itude)?|lng|lon(?:gitude)?)\\s*[:=]\\s*-?\\d{1,3}\\.\\d{3,}", "confidence": 0.9 },
+    { "id": "endereco", "label": "Endereço", "category": "localizacao", "severity": "high", "pattern": "\\b(?:av\\.?|avenida|rua|alameda|travessa|pra[çc]a|estrada|rodovia)\\s+(?:[\\p{L}.'-]+\\s+){0,4}[\\p{L}.'-]+(?:,?\\s*(?:n[ºo°.]*\\s*)?\\d{1,5})?", "confidence": 0.75 },
+    { "id": "senha", "label": "Senha em texto", "category": "credencial", "severity": "critical", "pattern": "(?:senha|password|passwd|pwd)[\"']?\\s*[:=]\\s*[\"']?[^\\s\"',;}]+", "confidence": 0.95 },
+    { "id": "jwt", "label": "Token JWT", "category": "credencial", "severity": "critical", "pattern": "eyJ[\\w-]{5,}\\.[\\w-]{5,}\\.[\\w-]{5,}", "confidence": 0.97 },
+    { "id": "bearer", "label": "Bearer token", "category": "credencial", "severity": "critical", "pattern": "Bearer\\s+[A-Za-z0-9._~+/-]{10,}=*", "confidence": 0.98 },
+    { "id": "api-key", "label": "Chave de API", "category": "credencial", "severity": "critical", "pattern": "(?<![\\w-])(?:sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{30,})(?![\\w-])", "confidence": 0.97 },
+    { "id": "cartao", "label": "Cartão de crédito", "category": "financeiro", "severity": "critical", "pattern": "(?<![\\d-])(?:\\d[ -]?){12,18}\\d(?![\\d-])", "validator": "luhn", "confidence": 0.9 },
+    { "id": "nascimento", "label": "Data de nascimento", "category": "identificador", "severity": "medium", "pattern": "(?<!\\d)\\d{2}/\\d{2}/\\d{4}(?!\\d)", "context": ["nascimento", "nasc", "dob"], "contextWindow": 30, "confidence": 0.8 },
+    { "id": "ipv4", "label": "Endereço IP", "category": "rede", "severity": "low", "pattern": "(?<![\\d.])(?:\\d{1,3}\\.){3}\\d{1,3}(?![\\d.])", "validator": "ipv4", "confidence": 0.7 },
+    { "id": "saude", "label": "Dado de saúde", "category": "saude", "severity": "high", "sensitive": true, "pattern": "(?<![\\p{L}])(?:diab[eé]t\\p{L}*|hipertens\\p{L}*|hiv|aids|c[âa]ncer|oncol\\p{L}*|depress\\p{L}*|ansiedade|bipolar|esquizofreni\\p{L}*|epilep\\p{L}*|asma|gestante|gravidez|gr[áa]vida|cid-?\\s?[a-z]\\d{2}|laudo m[ée]dico|medica[çc][ãa]o|cadeirante|defici[êe]ncia)(?![\\p{L}])", "confidence": 0.85 }
+  ],
+  "keyHints": [
+    { "pattern": "^(senha|password|passwd|pwd|secret)$", "category": "credencial", "severity": "critical", "label": "Campo de senha" },
+    { "pattern": "^(token|authorization|access_?token|refresh_?token|jwt|api_?key)$", "category": "credencial", "severity": "critical", "label": "Credencial/token" },
+    { "pattern": "^cpf$", "category": "identificador", "severity": "high", "label": "Campo CPF" },
+    { "pattern": "^e-?mail$", "category": "contato", "severity": "medium", "label": "Campo e-mail" },
+    { "pattern": "^(telefone|celular|phone|whatsapp)$", "category": "contato", "severity": "medium", "label": "Campo telefone" },
+    { "pattern": "^(lat|lng|lon|latitude|longitude)$", "category": "localizacao", "severity": "high", "label": "Coordenada GPS" },
+    { "pattern": "^(origem|destino|endereco|endereço|posicao|posição|localizacao|localização)$", "category": "localizacao", "severity": "high", "label": "Local do trajeto" }
+  ]
+}
